@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { callAppScript } from '../../lib/api';
-import { Loader2, Calendar as CalIcon, Filter, Download, Search, X } from 'lucide-react';
+import { Loader2, Calendar as CalIcon, Filter, Download, Search, X, Edit2, Trash2 } from 'lucide-react';
 
 export default function LaporanKehadiran() {
   const [data, setData] = useState<any[]>([]);
@@ -16,6 +16,38 @@ export default function LaporanKehadiran() {
   const [search, setSearch] = useState('');
   
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
+  const [editingItem, setEditingItem] = useState<any>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Apakah Anda yakin ingin menghapus data absensi ini?')) return;
+    setDeletingId(id);
+    try {
+      await callAppScript('delete_absensi', { id });
+      setData(data.filter(item => item.id !== id));
+      alert('Data berhasil dihapus');
+    } catch (err: any) {
+      alert('Gagal menghapus: ' + err.message);
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  const handleEditSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      await callAppScript('edit_absensi', editingItem);
+      setData(data.map(item => item.id === editingItem.id ? editingItem : item));
+      setEditingItem(null);
+      alert('Data berhasil diperbarui');
+    } catch (err: any) {
+      alert('Gagal memperbarui: ' + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
 
   useEffect(() => {
     fetchData();
@@ -137,6 +169,7 @@ export default function LaporanKehadiran() {
                 <th className="px-6 py-4 text-left text-[11px] font-black text-slate-400 uppercase tracking-wider">Nama Siswa</th>
                 <th className="px-6 py-4 text-left text-[11px] font-black text-slate-400 uppercase tracking-wider">Kelas</th>
                 <th className="px-6 py-4 text-left text-[11px] font-black text-slate-400 uppercase tracking-wider">Status</th>
+                <th className="px-6 py-4 text-right text-[11px] font-black text-slate-400 uppercase tracking-wider">Aksi</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-slate-100">
@@ -162,6 +195,12 @@ export default function LaporanKehadiran() {
                     <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-1 rounded ${getStatusColor(item.status)}`}>
                       {item.status}
                     </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <div className="flex justify-end gap-2">
+                      <button onClick={() => setEditingItem(item)} className="text-blue-600 hover:text-blue-900 bg-blue-50 p-1.5 rounded-lg"><Edit2 className="w-4 h-4" /></button>
+                      <button onClick={() => handleDelete(item.id)} disabled={deletingId === item.id} className="text-rose-600 hover:text-rose-900 bg-rose-50 p-1.5 rounded-lg disabled:opacity-50"><Trash2 className="w-4 h-4" /></button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -226,6 +265,7 @@ export default function LaporanKehadiran() {
                       <tr>
                         <th className="px-4 py-3 text-left text-[11px] font-black text-slate-400 uppercase">Tanggal</th>
                         <th className="px-4 py-3 text-left text-[11px] font-black text-slate-400 uppercase">Status</th>
+                        <th className="px-4 py-3 text-right text-[11px] font-black text-slate-400 uppercase">Aksi</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
@@ -237,6 +277,12 @@ export default function LaporanKehadiran() {
                               {a.status}
                             </span>
                           </td>
+                          <td className="px-4 py-3 whitespace-nowrap text-right text-sm font-medium">
+                            <div className="flex justify-end gap-2">
+                              <button onClick={() => { setSelectedStudentId(null); setEditingItem(a); }} className="text-blue-600 hover:text-blue-900 p-1"><Edit2 className="w-3.5 h-3.5" /></button>
+                              <button onClick={() => handleDelete(a.id)} disabled={deletingId === a.id} className="text-rose-600 hover:text-rose-900 p-1 disabled:opacity-50"><Trash2 className="w-3.5 h-3.5" /></button>
+                            </div>
+                          </td>
                         </tr>
                       ))}
                     </tbody>
@@ -244,6 +290,39 @@ export default function LaporanKehadiran() {
                 </div>
               )}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Edit Absensi */}
+      {editingItem && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm overflow-y-auto">
+          <div className="bg-white rounded-3xl w-full max-w-sm shadow-2xl my-8">
+            <div className="px-6 py-4 border-b flex justify-between items-center bg-slate-50 rounded-t-3xl">
+              <h3 className="font-bold uppercase tracking-tight text-slate-800">Edit Data Absensi</h3>
+              <button onClick={() => setEditingItem(null)} className="text-slate-400 hover:text-slate-600"><X className="h-5 w-5" /></button>
+            </div>
+            <form onSubmit={handleEditSubmit} className="p-6 space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-500 mb-1">Tanggal</label>
+                <input type="date" required value={editingItem.tanggal?.split('T')[0]} onChange={e => setEditingItem({...editingItem, tanggal: e.target.value})} className="w-full border border-slate-200 rounded-xl p-3 text-sm focus:ring-emerald-500 outline-none" />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-500 mb-1">Status Kehadiran</label>
+                <select required value={editingItem.status} onChange={e => setEditingItem({...editingItem, status: e.target.value})} className="w-full border border-slate-200 rounded-xl p-3 text-sm focus:ring-emerald-500 outline-none">
+                  <option value="Hadir">Hadir</option>
+                  <option value="Sakit">Sakit</option>
+                  <option value="Ijin">Ijin</option>
+                  <option value="Alpa">Alpa</option>
+                  <option value="Pulang">Pulang</option>
+                </select>
+              </div>
+              <div className="pt-4 flex justify-end">
+                <button type="submit" disabled={loading} className="w-full px-6 py-3 bg-emerald-600 text-white rounded-xl font-bold text-sm hover:bg-emerald-700 disabled:opacity-50">
+                  {loading ? 'Menyimpan...' : 'Simpan Perubahan'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
