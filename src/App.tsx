@@ -1,12 +1,6 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
-
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './lib/AuthContext';
-import SetupScreen from './SetupScreen';
 import Login from './pages/Login';
 import DashboardGuru from './pages/guru/DashboardGuru';
 import DashboardSiswa from './pages/siswa/DashboardSiswa';
@@ -34,21 +28,9 @@ function ProtectedRoute({ children, role }: { children: React.ReactNode, role?: 
 
 function AppRoutes() {
   const { user, loading } = useAuth();
-  const [isConfigured, setIsConfigured] = useState<boolean | null>(null);
 
-  useEffect(() => {
-    fetch('/api/config')
-      .then(res => res.json())
-      .then(data => setIsConfigured(data.configured))
-      .catch(() => setIsConfigured(false));
-  }, []);
-
-  if (isConfigured === null || loading) {
+  if (loading) {
     return <div className="min-h-screen flex items-center justify-center bg-slate-50 text-emerald-600 font-bold uppercase tracking-widest">Loading...</div>;
-  }
-
-  if (!isConfigured) {
-    return <SetupScreen />;
   }
 
   return (
