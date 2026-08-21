@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Save, Loader2 } from 'lucide-react';
+import { SURAH_NAMES } from '../../lib/constants';
 import { callAppScript } from '../../lib/api';
 
 interface Student {
@@ -121,9 +122,9 @@ export default function SetoranForm() {
                 className="w-full rounded-xl border border-slate-300 py-3 px-4 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm font-medium"
               >
                 <option value="">-- Pilih Surah --</option>
-                <option value="78">An-Naba'</option>
-                <option value="79">An-Nazi'at</option>
-                <option value="80">'Abasa</option>
+                {Object.entries(SURAH_NAMES).map(([id, name]) => (
+                  <option key={id} value={id}>{name}</option>
+                ))}
               </select>
             </div>
             <div className="grid grid-cols-2 gap-4">

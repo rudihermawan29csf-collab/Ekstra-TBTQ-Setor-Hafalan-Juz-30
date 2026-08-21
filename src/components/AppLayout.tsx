@@ -17,11 +17,14 @@ export default function AppLayout() {
     { name: 'Riwayat Hafalan', to: '/guru/riwayat', icon: History },
     { name: 'Progress Siswa', to: '/guru/progress', icon: BarChart },
     { name: 'Target Hafalan', to: '/guru/target', icon: Target },
+    { name: 'Input Kehadiran', to: '/guru/input-kehadiran', icon: Calendar },
+    { name: 'Laporan Kehadiran', to: '/guru/kehadiran', icon: Calendar },
     { name: 'Laporan', to: '/guru/laporan', icon: FileText },
   ];
 
   const studentLinks = [
     { name: 'Beranda', to: '/', icon: LayoutDashboard },
+    { name: 'Kehadiran', to: '/siswa/absensi', icon: Calendar },
     { name: 'Hafalanku', to: '/siswa/hafalan', icon: BookOpen },
     { name: 'Progress', to: '/siswa/progress', icon: BarChart },
     { name: 'Murojaah', to: '/siswa/murojaah', icon: History },
