@@ -19,6 +19,7 @@ import HafalanSiswa from './pages/siswa/HafalanSiswa';
 import ProgressDetailSiswa from './pages/siswa/ProgressDetailSiswa';
 import MurojaahSiswa from './pages/siswa/MurojaahSiswa';
 import ProfilSiswa from './pages/siswa/ProfilSiswa';
+import DataUser from './pages/guru/DataUser';
 import AppLayout from './components/AppLayout';
 
 function ProtectedRoute({ children, role }: { children: React.ReactNode, role?: 'teacher' | 'student' }) {
@@ -50,6 +51,7 @@ function AppRoutes() {
         <Route path="guru/input-kehadiran" element={<ProtectedRoute role="teacher"><InputKehadiran /></ProtectedRoute>} />
         <Route path="guru/kehadiran" element={<ProtectedRoute role="teacher"><LaporanKehadiran /></ProtectedRoute>} />
         <Route path="guru/laporan" element={<ProtectedRoute role="teacher"><Laporan /></ProtectedRoute>} />
+        <Route path="guru/users" element={<ProtectedRoute role="teacher"><DataUser /></ProtectedRoute>} />
 
         {/* Siswa Routes */}
         <Route path="siswa/hafalan" element={<ProtectedRoute role="student"><HafalanSiswa /></ProtectedRoute>} />

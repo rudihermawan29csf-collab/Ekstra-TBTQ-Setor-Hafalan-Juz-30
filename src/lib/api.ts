@@ -1,4 +1,4 @@
-export const APPSCRIPT_URL = "https://script.google.com/macros/s/AKfycbzHj4djaR2HXHssBODt6b3R3hfXiiYJkaM9fE2H29Y2OoDUV0rAQph29VDiLOLMfQEPjw/exec";
+export const APPSCRIPT_URL = "https://script.google.com/macros/s/AKfycbw6Vs0TtQLd-4OhTtjmQJkb-haksRVc_hL-ssPtSWX_AYUoj8mBls8DjDi5gHDwvhbljQ/exec";
 
 export async function callAppScript(action: string, payload: any = {}) {
   try {

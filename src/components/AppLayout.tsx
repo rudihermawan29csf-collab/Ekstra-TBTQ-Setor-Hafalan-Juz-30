@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
-import { BookOpen, Users, LayoutDashboard, History, Settings, LogOut, Menu, X, BarChart, Target, FileText, Calendar, School } from 'lucide-react';
+import { BookOpen, Users, LayoutDashboard, History, Settings, LogOut, Menu, X, BarChart, Target, FileText, Calendar, School, UserCog } from 'lucide-react';
 import { useAuth } from '../lib/AuthContext';
 import { cn } from '../lib/utils';
 
@@ -20,6 +20,7 @@ export default function AppLayout() {
     { name: 'Input Kehadiran', to: '/guru/input-kehadiran', icon: Calendar },
     { name: 'Laporan Kehadiran', to: '/guru/kehadiran', icon: Calendar },
     { name: 'Laporan', to: '/guru/laporan', icon: FileText },
+    { name: 'Pengaturan User', to: '/guru/users', icon: UserCog },
   ];
 
   const studentLinks = [
