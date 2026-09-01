@@ -55,8 +55,8 @@ function AppRoutes() {
 
         {/* Siswa Routes */}
         <Route path="siswa/hafalan" element={<ProtectedRoute role="student"><HafalanSiswa /></ProtectedRoute>} />
-        <Route path="siswa/progress" element={<ProtectedRoute role="student"><ProgressDetailSiswa /></ProtectedRoute>} />
-        <Route path="siswa/murojaah" element={<ProtectedRoute role="student"><MurojaahSiswa /></ProtectedRoute>} />
+        
+        
         <Route path="siswa/absensi" element={<ProtectedRoute role="student"><AbsensiSiswa /></ProtectedRoute>} />
         <Route path="siswa/profil" element={<ProtectedRoute role="student"><ProfilSiswa /></ProtectedRoute>} />
       </Route>

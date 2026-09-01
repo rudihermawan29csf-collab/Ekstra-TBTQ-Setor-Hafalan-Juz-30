@@ -27,8 +27,8 @@ export default function AppLayout() {
     { name: 'Beranda', to: '/', icon: LayoutDashboard },
     { name: 'Kehadiran', to: '/siswa/absensi', icon: Calendar },
     { name: 'Hafalanku', to: '/siswa/hafalan', icon: BookOpen },
-    { name: 'Progress', to: '/siswa/progress', icon: BarChart },
-    { name: 'Murojaah', to: '/siswa/murojaah', icon: History },
+    
+    
     { name: 'Profil', to: '/siswa/profil', icon: Users },
   ];
 
