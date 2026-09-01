@@ -1,19 +1,63 @@
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../lib/AuthContext';
-import { Book, Award, Clock } from 'lucide-react';
+import { callAppScript } from '../../lib/api';
+import { getSurahName, SURAH_NAMES } from '../../lib/constants';
+import { Book, Award, Clock, Loader2 } from 'lucide-react';
 
 export default function DashboardSiswa() {
   const { user } = useAuth();
+  const [records, setRecords] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const surahProgress = [
-    { name: "An-Naba'", current: 40, total: 40, status: 'Selesai' },
-    { name: "An-Nazi'at", current: 28, total: 46, status: 'Sedang berjalan' },
-    { name: "'Abasa", current: 0, total: 42, status: 'Belum mulai' },
-  ];
+  useEffect(() => {
+    fetchData();
+  }, []);
 
-  const recentRecords = [
-    { date: '20-08-2026', surah: "An-Naba'", ayat: '1–5', type: 'Baru', note: 'Lancar' },
-    { date: '27-08-2026', surah: "An-Naba'", ayat: '6–10', type: 'Baru', note: 'Sangat Lancar' },
-  ];
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const setoranRes = await callAppScript('get_setoran');
+      const studentRecords = (setoranRes || []).filter((s: any) => s.siswa_id === user?.siswa_id);
+      setRecords(studentRecords);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const totalSetoran = records.length;
+  
+  // Hitung jumlah surah unik yang sudah disetor
+  const uniqueSurahs = new Set(records.map(r => r.surah));
+  const totalSurahSelesai = uniqueSurahs.size;
+
+  // Setoran terakhir
+  const sortedRecords = [...records].sort((a, b) => new Date(b.tanggal).getTime() - new Date(a.tanggal).getTime());
+  const lastSetoran = sortedRecords.length > 0 ? sortedRecords[0] : null;
+
+  // Recent 5 records
+  const recentRecords = sortedRecords.slice(0, 5);
+
+  // Kalkulasi progress
+  // Sebagai contoh, kita gunakan 564 ayat di Juz 30 (rata-rata)
+  // Untuk menghitung riil ayat yg disetor cukup kompleks tanpa database master surah.
+  // Kita buat estimasi berdasarkan jumlah surah unik (dari 37 surah).
+  const progressPercentage = Math.round((totalSurahSelesai / 37) * 100);
+
+  // Ambil beberapa progress untuk ditampilkan
+  const surahProgress = Object.entries(SURAH_NAMES).slice(0, 5).map(([id, name]) => {
+    const isDone = uniqueSurahs.has(id);
+    return {
+      name,
+      status: isDone ? 'Selesai' : 'Belum mulai',
+      progress: isDone ? 100 : 0
+    };
+  });
+
+  if (loading) {
+    return <div className="flex h-64 items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-emerald-500" /></div>;
+  }
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
@@ -21,17 +65,17 @@ export default function DashboardSiswa() {
         <div className="relative z-10">
           <p className="text-xs font-bold text-emerald-100 uppercase tracking-widest mb-1">Assalamu'alaikum</p>
           <h1 className="text-3xl sm:text-4xl font-black tracking-tight mb-2">{user?.nama}</h1>
-          <p className="text-emerald-50 mb-6 text-sm font-medium">Kelas VIII A • Tahun Pelajaran 2026/2027</p>
+          <p className="text-emerald-50 mb-6 text-sm font-medium">Siswa TBTQ • Semangat Menghafal</p>
           
           <div className="bg-white/20 backdrop-blur-md rounded-2xl p-5 border border-white/20 shadow-sm">
             <div className="flex justify-between items-end mb-2">
-              <span className="text-xs font-bold text-emerald-50 uppercase tracking-wider">Progress Hafalan Juz 30</span>
-              <span className="text-3xl font-black">45%</span>
+              <span className="text-xs font-bold text-emerald-50 uppercase tracking-wider">Progress Juz 30 (Berdasarkan Surah)</span>
+              <span className="text-3xl font-black">{progressPercentage}%</span>
             </div>
             <div className="w-full bg-emerald-800/50 rounded-full h-3 mb-2 overflow-hidden">
-              <div className="bg-white h-full rounded-full" style={{ width: '45%' }}></div>
+              <div className="bg-white h-full rounded-full transition-all duration-1000" style={{ width: `${progressPercentage}%` }}></div>
             </div>
-            <p className="text-[11px] font-bold text-emerald-100 text-right uppercase tracking-wider">180 / 564 ayat</p>
+            <p className="text-[11px] font-bold text-emerald-100 text-right uppercase tracking-wider">{totalSurahSelesai} / 37 Surah</p>
           </div>
         </div>
         
@@ -44,51 +88,30 @@ export default function DashboardSiswa() {
           <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 mb-4">
             <Book size={24} />
           </div>
-          <p className="text-3xl font-black text-slate-900">5</p>
-          <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Surah Selesai</p>
+          <p className="text-3xl font-black text-slate-900">{totalSurahSelesai}</p>
+          <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mt-1">Surah Disetor</p>
         </div>
+        
         <div className="bg-white p-5 rounded-3xl shadow-sm border border-slate-200 flex flex-col">
           <div className="w-10 h-10 bg-purple-50 rounded-xl flex items-center justify-center text-purple-600 mb-4">
             <Award size={24} />
           </div>
-          <p className="text-3xl font-black text-slate-900">18</p>
-          <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Setoran</p>
+          <p className="text-3xl font-black text-slate-900">{totalSetoran}</p>
+          <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mt-1">Total Setoran</p>
         </div>
+        
         <div className="bg-white p-5 rounded-3xl shadow-sm border border-slate-200 flex flex-col">
           <div className="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center text-amber-600 mb-4">
             <Clock size={24} />
           </div>
-          <p className="text-xl font-black text-slate-900 mt-1 mb-1">20 Agu 26</p>
-          <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Setoran Terakhir</p>
+          <p className="text-xl font-black text-slate-900 mt-1 mb-1">
+            {lastSetoran ? new Date(lastSetoran.tanggal).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: '2-digit' }) : '-'}
+          </p>
+          <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mt-1">Setoran Terakhir</p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
-          <div className="px-6 py-5 border-b border-slate-100">
-            <h2 className="text-lg font-bold text-slate-900 tracking-tight">Target & Progress Surah</h2>
-          </div>
-          <div className="p-6 space-y-6">
-            {surahProgress.map((surah, idx) => (
-              <div key={idx}>
-                <div className="flex justify-between items-center mb-2">
-                  <div className="flex items-center gap-2">
-                    <span className={`w-2 h-2 rounded-full ${surah.status === 'Selesai' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]' : surah.status === 'Sedang berjalan' ? 'bg-amber-400' : 'bg-slate-300'}`}></span>
-                    <span className="text-sm font-bold text-slate-800">{surah.name}</span>
-                  </div>
-                  <span className="text-[11px] font-black text-slate-400 uppercase tracking-wider">{surah.current} / {surah.total} ayat</span>
-                </div>
-                <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
-                  <div 
-                    className={`h-full rounded-full ${surah.status === 'Selesai' ? 'bg-emerald-500' : 'bg-amber-400'}`} 
-                    style={{ width: `${(surah.current / surah.total) * 100}%` }}
-                  ></div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
         <div className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
           <div className="px-6 py-5 border-b border-slate-100 flex justify-between items-center">
             <h2 className="text-lg font-bold text-slate-900 tracking-tight">Riwayat Terakhir</h2>
@@ -102,16 +125,19 @@ export default function DashboardSiswa() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {recentRecords.map((record, idx) => (
+                {recentRecords.length === 0 ? (
+                  <tr><td colSpan={2} className="px-6 py-8 text-center text-slate-500">Belum ada riwayat.</td></tr>
+                ) : recentRecords.map((record, idx) => (
                   <tr key={idx} className="bg-white hover:bg-slate-50 transition-colors">
                     <td className="px-6 py-4">
-                      <p className="font-bold text-slate-900">{record.surah} <span className="text-slate-400 font-medium text-xs ml-1">ayat {record.ayat}</span></p>
-                      <p className="text-[11px] text-slate-400 font-bold uppercase mt-1 tracking-wider">{record.date}</p>
+                      <p className="font-bold text-slate-900">{getSurahName(record.surah)} <span className="text-slate-400 font-medium text-xs ml-1">ayat {record.ayat_mulai}-{record.ayat_selesai}</span></p>
+                      <p className="text-[11px] text-slate-400 font-bold uppercase mt-1 tracking-wider">{new Date(record.tanggal).toLocaleDateString('id-ID')}</p>
                     </td>
                     <td className="px-6 py-4">
                       <span className="inline-flex items-center px-2 py-1 rounded bg-emerald-50 text-emerald-600 text-[10px] font-black uppercase tracking-wider border border-emerald-100">
-                        {record.note}
+                        {record.nilai}
                       </span>
+                      <p className="text-[10px] text-slate-400 mt-1">{record.jenis}</p>
                     </td>
                   </tr>
                 ))}
@@ -119,6 +145,35 @@ export default function DashboardSiswa() {
             </table>
           </div>
         </div>
+
+        <div className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
+          <div className="px-6 py-5 border-b border-slate-100">
+            <h2 className="text-lg font-bold text-slate-900 tracking-tight">Sampel Status Surah</h2>
+          </div>
+          <div className="p-6 space-y-6">
+            {surahProgress.map((surah, idx) => (
+              <div key={idx}>
+                <div className="flex justify-between items-center mb-2">
+                  <div className="flex items-center gap-2">
+                    <span className={`w-2 h-2 rounded-full ${surah.status === 'Selesai' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]' : 'bg-slate-300'}`}></span>
+                    <span className="text-sm font-bold text-slate-800">{surah.name}</span>
+                  </div>
+                  <span className="text-[11px] font-black text-slate-400 uppercase tracking-wider">{surah.status}</span>
+                </div>
+                <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                  <div 
+                    className={`h-full rounded-full transition-all duration-1000 ${surah.status === 'Selesai' ? 'bg-emerald-500' : 'bg-slate-200'}`} 
+                    style={{ width: `${surah.progress}%` }}
+                  ></div>
+                </div>
+              </div>
+            ))}
+            <div className="text-center pt-2">
+              <a href="/siswa/progress" className="text-xs font-bold text-emerald-600 hover:text-emerald-700 uppercase tracking-wider">Lihat Semua Progress →</a>
+            </div>
+          </div>
+        </div>
+        
       </div>
     </div>
   );

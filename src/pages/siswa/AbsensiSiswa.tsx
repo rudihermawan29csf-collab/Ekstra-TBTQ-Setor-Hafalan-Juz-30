@@ -20,7 +20,7 @@ export default function AbsensiSiswa() {
   const fetchHistory = async () => {
     setHistoryLoading(true);
     try {
-      const data = await callAppScript('get_absensi_siswa', { siswa_id: user?.id });
+      const data = await callAppScript('get_absensi_siswa', { siswa_id: user?.siswa_id });
       setHistory(data || []);
     } catch (error: any) {
       console.error(error);
@@ -37,7 +37,7 @@ export default function AbsensiSiswa() {
     setLoading(true);
     try {
       await callAppScript('simpan_absensi', {
-        siswa_id: user?.id,
+        siswa_id: user?.siswa_id,
         tanggal,
         status
       });

@@ -15,6 +15,10 @@ import Laporan from './pages/guru/Laporan';
 import InputKehadiran from './pages/guru/InputKehadiran';
 import LaporanKehadiran from './pages/guru/LaporanKehadiran';
 import AbsensiSiswa from './pages/siswa/AbsensiSiswa';
+import HafalanSiswa from './pages/siswa/HafalanSiswa';
+import ProgressDetailSiswa from './pages/siswa/ProgressDetailSiswa';
+import MurojaahSiswa from './pages/siswa/MurojaahSiswa';
+import ProfilSiswa from './pages/siswa/ProfilSiswa';
 import AppLayout from './components/AppLayout';
 
 function ProtectedRoute({ children, role }: { children: React.ReactNode, role?: 'teacher' | 'student' }) {
@@ -48,11 +52,11 @@ function AppRoutes() {
         <Route path="guru/laporan" element={<ProtectedRoute role="teacher"><Laporan /></ProtectedRoute>} />
 
         {/* Siswa Routes */}
-        <Route path="siswa/hafalan" element={<ProtectedRoute role="student"><div>Hafalanku</div></ProtectedRoute>} />
-        <Route path="siswa/progress" element={<ProtectedRoute role="student"><div>Progress</div></ProtectedRoute>} />
-        <Route path="siswa/murojaah" element={<ProtectedRoute role="student"><div>Murojaah</div></ProtectedRoute>} />
+        <Route path="siswa/hafalan" element={<ProtectedRoute role="student"><HafalanSiswa /></ProtectedRoute>} />
+        <Route path="siswa/progress" element={<ProtectedRoute role="student"><ProgressDetailSiswa /></ProtectedRoute>} />
+        <Route path="siswa/murojaah" element={<ProtectedRoute role="student"><MurojaahSiswa /></ProtectedRoute>} />
         <Route path="siswa/absensi" element={<ProtectedRoute role="student"><AbsensiSiswa /></ProtectedRoute>} />
-        <Route path="siswa/profil" element={<ProtectedRoute role="student"><div>Profil</div></ProtectedRoute>} />
+        <Route path="siswa/profil" element={<ProtectedRoute role="student"><ProfilSiswa /></ProtectedRoute>} />
       </Route>
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>
